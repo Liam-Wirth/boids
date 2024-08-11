@@ -5,7 +5,6 @@ use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::sprite::Mesh2dHandle;
 use bevy::tasks::ComputeTaskPool;
-use bevy_spatial::kdtree;
 use bevy_spatial::kdtree::KDTree2;
 use bevy_spatial::SpatialAccess;
 use halton::Sequence;
@@ -206,26 +205,29 @@ pub fn velo_system(
             todo!()
         };
 
-        velocity.0.x += dv.x;
-        velocity.0.y += dv.y;
+        velocity.0 += *dv;
 
         let res = &window.single().resolution;
 
         let width = (res.width() - values.boid_bound_size) / 2.;
         let height = (res.height() - values.boid_bound_size) / 2.;
 
-        // Steer back into visible region
-        if transform.translation.x < -width {
-            velocity.0.x += values.boid_turn_factor;
-        }
-        if transform.translation.x > width {
-            velocity.0.x -= values.boid_turn_factor;
-        }
-        if transform.translation.y < -height {
-            velocity.0.y += values.boid_turn_factor;
-        }
-        if transform.translation.y > height {
-            velocity.0.y -= values.boid_turn_factor;
+        if values.is_toroidal {
+            // TODO:
+        } else {
+            // Steer back into visible region
+            if transform.translation.x < -width {
+                velocity.0.x += values.boid_turn_factor;
+            }
+            if transform.translation.x > width {
+                velocity.0.x -= values.boid_turn_factor;
+            }
+            if transform.translation.y < -height {
+                velocity.0.y += values.boid_turn_factor;
+            }
+            if transform.translation.y > height {
+                velocity.0.y -= values.boid_turn_factor;
+            }
         }
 
         // Clamp speed

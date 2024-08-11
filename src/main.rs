@@ -1,23 +1,18 @@
 mod boid;
 
 use bevy::{
-    math::Vec3Swizzles,
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
-use std::sync::Arc;
 use bevy_spatial::{kdtree::KDTree2, SpatialAccess};
 use bevy_spatial::{AutomaticUpdate, SpatialStructure};
 use boid::*;
-use halton::Sequence;
-use rand::prelude::*;
 use std::time::Duration;
 pub const CLEAR: Color = Color::srgb(0.0, 0.0, 0.0);
 
 pub const BOUNDS: Vec2 = Vec2::new(800.0, 400.0);
 
 use boid::SpatialEntity;
-use boid::*;
 
 #[derive(Resource, Copy, Clone)]
 pub struct Values {
@@ -78,7 +73,7 @@ impl Default for Values {
 
             vis_range_sq: 35.0 * 35.0,
             prot_range_sq: 10.0 * 10.0,
-            is_toroidal: true,
+            is_toroidal: false,
         }
     }
 }
@@ -104,5 +99,7 @@ fn main() {
         .add_event::<DvEvent>()
         .add_systems(Startup, boid_setup)
         .add_systems(FixedUpdate, (velo_system, movement_system, flocking_system))
+        //.add_systems(Update, ui_system)
         .run();
 }
+
