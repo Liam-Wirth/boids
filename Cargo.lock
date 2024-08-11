@@ -16,6 +16,8 @@ dependencies = [
  "image",
  "log",
  "rand",
+ "wasm-bindgen-futures",
+ "web-sys",
  "webbrowser",
  "winit",
 ]
