@@ -1,10 +1,6 @@
 mod boid;
 
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
-use bevy_spatial::{kdtree::KDTree2, SpatialAccess};
+use bevy::prelude::*;
 use bevy_spatial::{AutomaticUpdate, SpatialStructure};
 use boid::*;
 use std::time::Duration;
