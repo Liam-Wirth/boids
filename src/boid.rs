@@ -207,25 +207,26 @@ pub fn velo_system(
 
         velocity.0 += *dv;
 
-        let res = &window.single().resolution;
-
-        let width = (res.width() - values.boid_bound_size) / 2.;
-        let height = (res.height() - values.boid_bound_size) / 2.;
+        let window = window.single();
+        let width = ((window.width() - values.boid_bound_size) / 2.) as i32;
+        let height = ((window.height() - values.boid_bound_size) / 2.) as i32;
 
         if values.is_toroidal {
             // TODO:
         } else {
+            let pos_x = transform.translation.x as i32;
+            let pos_y = transform.translation.y as i32;
             // Steer back into visible region
-            if transform.translation.x < -width {
+            if pos_x < -width {
                 velocity.0.x += values.boid_turn_factor;
             }
-            if transform.translation.x > width {
+            if pos_x > width {
                 velocity.0.x -= values.boid_turn_factor;
             }
-            if transform.translation.y < -height {
+            if pos_y < -height {
                 velocity.0.y += values.boid_turn_factor;
             }
-            if transform.translation.y > height {
+            if pos_y > height {
                 velocity.0.y -= values.boid_turn_factor;
             }
         }
@@ -235,8 +236,7 @@ pub fn velo_system(
 
         if speed < values.boid_min_speed {
             velocity.0 *= values.boid_min_speed / speed;
-        }
-        if speed > values.boid_max_speed {
+        } else {
             velocity.0 *= values.boid_max_speed / speed;
         }
     }

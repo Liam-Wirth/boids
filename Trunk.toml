@@ -1,3 +1,6 @@
 
 [serve]
 port = 8080
+
+[watch]
+debounce = 1000 # milliseconds
