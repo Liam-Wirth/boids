@@ -1,15 +1,15 @@
 [package]
-name = "Boids" # ToDo
+name = "boids" # ToDo
 version = "0.1.0"
 publish = false
 authors = ["liam Wirth"]
 edition = "2021"
 exclude = ["dist", "build", "assets", "credits"]
 
-[features]
-dev = [
-    "bevy/dynamic_linking",
-]
+# [features]
+# dev = [
+    # "bevy/dynamic_linking",
+# ]
 # web:
 
 # All of Bevy's default features exept for the audio related ones (bevy_audio, vorbis), since they clash with bevy_kira_audio
@@ -51,6 +51,7 @@ bevy_prototype_lyon = "0.12.0"
 bevy_spatial = "0.9.0"
 halton = "0.2.1"
 wasm-bindgen = "0.2.93"
+bevy_egui = { version = "0.28.0", default-features = false, features = ["default_fonts"] }
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 env_logger = "0.10"
@@ -60,4 +61,11 @@ env_logger = "0.10"
 wasm-bindgen-futures = "0.4"
 web-sys = "0.3.70"
 
+[profile.dev]
+opt-level = 1 # someone says this makes it faster to compile I dunno
+
+[alias]
+build = "build --release"
+build-web = "build --target wasm32-unknown-unknown --release"
+clip = "clippy --all-targets"
 

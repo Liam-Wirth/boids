@@ -13,47 +13,47 @@ pub const BOUNDS: Vec2 = Vec2::new(400.0, 200.0);
 #[derive(Resource, Copy, Clone)]
 pub struct Values {
     /// Number of boids to spawn
-    boid_count: i32,
+    pub boid_count: i32,
     /// Size of the boids
-    boid_size: f32,
+    pub boid_size: f32,
     /// Speed of the boids
-    boid_speed: f32,
+    pub boid_speed: f32,
     ///Maximum number of neighbors a boid can have
-    max_neighbors: usize,
+    pub max_neighbors: usize,
     /// Visibility range of the boids, determines how far away a boid can see another boid
-    boid_vis_range: f32,
+    pub boid_vis_range: f32,
     /// Protection range of the boids, determines how far away a boid can see a predator/obstacle
     /// or a boid that is determined to be "too close"
-    boid_prot_range: f32,
+    pub boid_prot_range: f32,
     /// Factor/amount that the boids want to center around the center of mass of the boids
-    boid_centering_factor: f32,
+    pub boid_centering_factor: f32,
     /// Factor/amount that the boids want to avoid each other
-    boid_avoidance_factor: f32,
+    pub boid_avoidance_factor: f32,
     /// Factor/amount that the boids want to match the velocity of the boids around them
-    boid_matching_factor: f32,
+    pub boid_matching_factor: f32,
     /// Minimum speed of the boids
-    boid_min_speed: f32,
+    pub boid_min_speed: f32,
     /// Maximum speed of the boids
-    boid_max_speed: f32,
+    pub boid_max_speed: f32,
     ///boid field of view
-    boid_fov: f32,
+    pub boid_fov: f32,
 
-    vis_range_sq: f32,
-    prot_range_sq: f32,
+    pub vis_range_sq: f32,
+    pub prot_range_sq: f32,
 
-    boid_mouse_chase_factor: f32,
-    boid_bound_size: f32,
-    boid_turn_factor: f32,
+    pub boid_mouse_chase_factor: f32,
+    pub boid_bound_size: f32,
+    pub boid_turn_factor: f32,
 
-    is_toroidal: bool,
+    pub is_toroidal: bool,
 }
 
 impl Default for Values {
     #[cfg(not(target_arch = "wasm32"))]
     fn default() -> Self {
         Self {
-            boid_count: 1000,
-            boid_size: 0.27,
+            boid_count: 500,
+            boid_size: 0.4,
             boid_speed: 5.,
             max_neighbors: 100,
             boid_vis_range: 35.0,
@@ -91,23 +91,19 @@ impl Default for Values {
             boid_matching_factor: 0.05,
             boid_min_speed: 5.,
             boid_max_speed: 10.,
-            vis_range_sq: 25.0 * 25.0,  // Updated to match new boid_vis_range
+            vis_range_sq: 25.0 * 25.0, // Updated to match new boid_vis_range
             prot_range_sq: 10.0 * 10.0,
             is_toroidal: false,
         }
     }
 }
 
-
 #[derive(Resource, Default)]
 pub struct FpsCounter {
     fps: f64,
 }
 
-pub fn update_fps_counter(
-    time: Res<Time>,
-    mut fps_counter: ResMut<FpsCounter>,
-) {
+pub fn update_fps_counter(time: Res<Time>, mut fps_counter: ResMut<FpsCounter>) {
     fps_counter.fps = 1.0 / time.delta_seconds_f64();
 }
 
@@ -117,7 +113,7 @@ pub fn display_fps(
     mut query: Query<Entity, With<FpsText>>,
 ) {
     let fps_text = format!("FPS: {:.2}", fps_counter.fps);
-    
+
     if let Ok(entity) = query.get_single_mut() {
         commands.entity(entity).despawn();
     }

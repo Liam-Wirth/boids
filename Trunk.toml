@@ -4,3 +4,9 @@ port = 8080
 
 [watch]
 debounce = 1000 # milliseconds
+patterns = ["styles.css", "tailwind.config.js", "index.html"]
+command = "npm run build:css"
+
+[build.step]
+command = "npm run build:css"
+

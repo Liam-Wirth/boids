@@ -1,14 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Boids</title>
+    <link data-trunk rel="css" href="src/css/tailwind.css" />
   </head>
-  <body>
-    <canvas id="bevy_boids_canvas"></canvas>
+<body class="h-screen flex items-center justify-center bg-blue-500">
+    <div class="flex flex-col items-center">
+      <canvas id="bevy_boids_canvas" class="w-80 h-80 rounded-lg hidden"></canvas>
+      <!-- Skeleton Placeholder -->
+      <div id="loading-placeholder" class="skeleton w-80 h-80 rounded-lg"></div>
+    </div>
+
     <script type="module">
-      import init from './Boids.js';
-      init();
+      const startButton = document.getElementById('start-button');
+      const loadingPlaceholder = document.getElementById('loading-placeholder');
+      const canvas = document.createElement('canvas');
+      const init = await import('./boids.js');
+      canvas.id = 'bevy_boids_canvas';
+      canvas.className = 'w-80 h-80 rounded-lg'; // Set the same size as the skeleton
+        loadingPlaceholder.replaceWith(canvas);
+         init();
     </script>
   </body>
 </html>

@@ -4,3 +4,8 @@ target/
 .vscode
 
 dist/
+
+tailwind.css
+src/css/tailwind.css
+
+node_modules/
