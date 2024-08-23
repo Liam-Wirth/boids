@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use bevy_spatial::{AutomaticUpdate, SpatialStructure};
+use boids::WINDOW_HEIGHT;
+use boids::WINDOW_WIDTH;
 use boids::boid::*;
 use boids::Values;
 use boids::BOUNDS;
@@ -45,7 +47,9 @@ fn main() {
         DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 canvas: Some("#bevy_boids_canvas".into()),
-                resizable: true,
+                resizable: false,
+                transparent: true,
+                resolution: (WINDOW_WIDTH, WINDOW_HEIGHT).into(),
                 ..default()
             }),
             ..default()

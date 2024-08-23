@@ -1,14 +1,28 @@
 use bevy::prelude::*;
 use wasm_bindgen::prelude::*;
 pub mod boid;
+pub mod web_ui;
 
 pub const CLEAR: Color = Color::srgb(0.0, 0.0, 0.0);
 
 #[cfg(not(target_arch = "wasm32"))]
-pub const BOUNDS: Vec2 = Vec2::new(800.0, 400.0);
+pub const WINDOW_WIDTH: f32 = 1000.0;
+#[cfg(not(target_arch = "wasm32"))]
+pub const WINDOW_HEIGHT: f32 = 600.0;
+#[cfg(not(target_arch = "wasm32"))]
+pub const MARGIN: f32 = 50.0;
+#[cfg(not(target_arch = "wasm32"))]
+pub const BOUNDS: Vec2 = Vec2::new(WINDOW_WIDTH - 2.0 * MARGIN, WINDOW_HEIGHT - 2.0 * MARGIN);
 
 #[cfg(target_arch = "wasm32")]
-pub const BOUNDS: Vec2 = Vec2::new(400.0, 200.0);
+pub const WINDOW_WIDTH: f32 = 1000.0;
+#[cfg(target_arch = "wasm32")]
+pub const WINDOW_HEIGHT: f32 = 600.0;
+#[cfg(target_arch = "wasm32")]
+pub const MARGIN: f32 = 150.0;
+#[cfg(target_arch = "wasm32")]
+pub const BOUNDS: Vec2 = Vec2::new(WINDOW_WIDTH - 2.0 * MARGIN, WINDOW_HEIGHT - 2.0 * MARGIN);
+
 
 #[derive(Resource, Copy, Clone)]
 pub struct Values {
@@ -46,6 +60,8 @@ pub struct Values {
     pub boid_turn_factor: f32,
 
     pub is_toroidal: bool,
+
+    pub is_mouse_predator: bool,
 }
 
 impl Default for Values {
@@ -70,6 +86,7 @@ impl Default for Values {
             vis_range_sq: 35.0 * 35.0,
             prot_range_sq: 10.0 * 10.0,
             is_toroidal: false,
+            is_mouse_predator: false,
         }
     }
 
@@ -94,6 +111,7 @@ impl Default for Values {
             vis_range_sq: 25.0 * 25.0, // Updated to match new boid_vis_range
             prot_range_sq: 10.0 * 10.0,
             is_toroidal: false,
+            is_mouse_predator: false,
         }
     }
 }

@@ -146,8 +146,13 @@ fn get_dv(
     let (camera, t_camera) = camera.single();
     if let Some(c_window) = window.single().cursor_position() {
         if let Some(c_world) = camera.viewport_to_world_2d(t_camera, c_window) {
-            let to_cursor = c_world - t0.translation.xy();
-            dv += to_cursor * values.boid_mouse_chase_factor;
+            if !values.is_mouse_predator {
+                let to_cursor = c_world - t0.translation.xy();
+                dv += to_cursor * values.boid_mouse_chase_factor;
+            } else {
+                let to_cursor = c_world - t0.translation.xy();
+                dv -= to_cursor * values.boid_mouse_chase_factor;
+            }
         };
     };
 
@@ -252,4 +257,57 @@ fn steer_to(a: Vec2, b: Vec2) -> f32 {
     // https://stackoverflow.com/a/68929139
     let dir = b - a;
     dir.y.atan2(dir.x)
+}
+
+pub fn setup_bounds(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    // Create a rectangular border
+    let border_thickness = 2.0;
+    
+    // Top border
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            color: Color::WHITE,
+            custom_size: Some(Vec2::new(BOUNDS.x, border_thickness)),
+            ..default()
+        },
+        transform: Transform::from_translation(Vec3::new(0.0, BOUNDS.y / 2.0, 0.0)),
+        ..default()
+    });
+
+    // Bottom border
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            color: Color::WHITE,
+            custom_size: Some(Vec2::new(BOUNDS.x, border_thickness)),
+            ..default()
+        },
+        transform: Transform::from_translation(Vec3::new(0.0, -BOUNDS.y / 2.0, 0.0)),
+        ..default()
+    });
+
+    // Left border
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            color: Color::WHITE,
+            custom_size: Some(Vec2::new(border_thickness, BOUNDS.y)),
+            ..default()
+        },
+        transform: Transform::from_translation(Vec3::new(-BOUNDS.x / 2.0, 0.0, 0.0)),
+        ..default()
+    });
+
+    // Right border
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            color: Color::WHITE,
+            custom_size: Some(Vec2::new(border_thickness, BOUNDS.y)),
+            ..default()
+        },
+        transform: Transform::from_translation(Vec3::new(BOUNDS.x / 2.0, 0.0, 0.0)),
+        ..default()
+    });
 }

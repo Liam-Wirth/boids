@@ -6,14 +6,17 @@
     <title>Boids</title>
     <link data-trunk rel="tailwind-css" href="src/css/tailwind.css" />
   </head>
-<body class="h-screen flex items-center justify-center bg-blue-500">
+  <body class="h-screen flex items-center justify-center ">
     <div class="flex flex-col items-center">
-      <canvas id="bevy_boids_canvas" class="w-80 h-80 rounded-lg hidden"></canvas>
+      <canvas id="bevy_boids_canvas" class="rounded-lg w-[1000px] h-[600px] hidden"></canvas>
       <!-- Skeleton Placeholder -->
-      <div id="loading-placeholder" class="skeleton w-80 h-80 rounded-lg"></div>
-
-
- <script type="module">
+      <div id="loading-placeholder" class="rounded-lg w-[1000px] h-[600px] bg-gray-200 animate-pulse"></div>
+    </div>
+ <div id="ui-controls">
+    <button id="toggle-predator">Toggle Predator Mode</button>
+  </div>
+    
+    <script type="module">
       (async () => {
         try {
           // Import your WASM module
@@ -21,15 +24,19 @@
           
           // Initialize the WASM module
           await initWasm();
-
-          // Replace the loading placeholder with the canvas
+          
           const canvas = document.getElementById('bevy_boids_canvas');
           const loadingPlaceholder = document.getElementById('loading-placeholder');
-          loadingPlaceholder.replaceWith(canvas);
-
+          loadingPlaceholder.classList.add('hidden');
+          canvas.classList.remove('hidden');
           console.log('WASM module loaded and initialized.');
         } catch (error) {
           console.error('Failed to load or initialize the WebAssembly module:', error);
+          const canvas = document.getElementById('bevy_boids_canvas');
+          const loadingPlaceholder = document.getElementById('loading-placeholder');
+          loadingPlaceholder.classList.add('hidden');
+          canvas.classList.remove('hidden');
+          
         }
       })();
     </script>
