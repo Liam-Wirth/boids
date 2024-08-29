@@ -151,7 +151,8 @@ fn get_dv(
                 dv += to_cursor * values.boid_mouse_chase_factor;
             } else {
                 let to_cursor = c_world - t0.translation.xy();
-                dv -= to_cursor * values.boid_mouse_chase_factor;
+                dv -= to_cursor * (values.boid_mouse_chase_factor); // make it more
+                // pronounced
             }
         };
     };

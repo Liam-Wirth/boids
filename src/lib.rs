@@ -17,7 +17,7 @@ pub const BOUNDS: Vec2 = Vec2::new(WINDOW_WIDTH - 2.0 * MARGIN, WINDOW_HEIGHT - 
 #[cfg(target_arch = "wasm32")]
 pub const WINDOW_WIDTH: f32 = 1000.0;
 #[cfg(target_arch = "wasm32")]
-pub const WINDOW_HEIGHT: f32 = 600.0;
+pub const WINDOW_HEIGHT: f32 = 800.;
 #[cfg(target_arch = "wasm32")]
 pub const MARGIN: f32 = 150.0;
 #[cfg(target_arch = "wasm32")]
@@ -93,10 +93,10 @@ impl Default for Values {
     #[cfg(target_arch = "wasm32")]
     fn default() -> Self {
         Self {
-            boid_count: 50,
-            boid_size: 0.7,
+            boid_count: 100,
+            boid_size: 0.4,
             boid_speed: 2.5,
-            max_neighbors: 50,
+            max_neighbors: 20,
             boid_vis_range: 25.0,
             boid_fov: 120.0 * std::f32::consts::PI / 180.0,
             boid_bound_size: 98.0,
@@ -111,7 +111,7 @@ impl Default for Values {
             vis_range_sq: 25.0 * 25.0, // Updated to match new boid_vis_range
             prot_range_sq: 10.0 * 10.0,
             is_toroidal: false,
-            is_mouse_predator: false,
+            is_mouse_predator: true,
         }
     }
 }
