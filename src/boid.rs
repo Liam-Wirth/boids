@@ -16,10 +16,20 @@ pub struct Velocity(Vec2);
 #[derive(Component)]
 pub struct SpatialEntity;
 
+#[derive(Component)]
+pub struct StartingColor(Vec3); // Stored as a vec3 cause it's lighter than a Color object
+
+impl Default for StartingColor {
+    fn default() -> Self {
+        let mut rng = rand::thread_rng();
+        StartingColor((360. * rng.gen::<f32>(), rng.gen(), 0.7).into())
+    }
+}
 #[derive(Bundle)]
 pub struct BoidBundle {
     mesh: MaterialMesh2dBundle<ColorMaterial>,
     velocity: Velocity,
+    start_color: StartingColor,
 }
 
 #[derive(Event)]
@@ -27,9 +37,11 @@ pub struct DvEvent(Entity, Vec2);
 
 impl Default for BoidBundle {
     fn default() -> Self {
+        let mut rng = rand::thread_rng();
         Self {
             mesh: Default::default(),
             velocity: Velocity(Vec2::default()),
+            start_color: StartingColor::default(),
         }
     }
 }
@@ -57,15 +69,19 @@ pub fn boid_setup(
             Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)) * values.boid_speed,
         );
 
+        let start = StartingColor::default();
+        let color = Color::hsl(start.0.x, start.0.y, start.0.z);
         commands.spawn((
             BoidBundle {
                 mesh: MaterialMesh2dBundle {
                     mesh: Mesh2dHandle(meshes.add(Circle { radius: 4.0 })),
-                    material: materials.add(Color::hsl(360. * rng.gen::<f32>(), rng.gen(), 0.7)),
+                    //material: materials.add(Color::hsl(360. * rng.gen::<f32>(), rng.gen(), 0.7)),
+                    material: materials.add(color),
                     transform,
                     ..default()
                 },
                 velocity,
+                start_color: start,
             },
             SpatialEntity,
         ));
@@ -88,6 +104,7 @@ fn get_dv(
     let mut avg_velocity = Vec2::default();
     let mut neighboring_boids = 0;
     let mut close_boids = 0;
+    let mut totalcolor = Vec3::ZERO; // gonna blend the color of boids that start flocking together
 
     for (_, entity) in kdtree.k_nearest_neighbour(t0.translation.xy(), values.max_neighbors) {
         let Ok((other, v1, t1)) = boid_query.get(entity.unwrap()) else {
@@ -146,13 +163,13 @@ fn get_dv(
     let (camera, t_camera) = camera.single();
     if let Some(c_window) = window.single().cursor_position() {
         if let Some(c_world) = camera.viewport_to_world_2d(t_camera, c_window) {
-            if !values.is_mouse_predator {
+            if !values.modes.mouse_predator {
                 let to_cursor = c_world - t0.translation.xy();
                 dv += to_cursor * values.boid_mouse_chase_factor;
             } else {
                 let to_cursor = c_world - t0.translation.xy();
                 dv -= to_cursor * (values.boid_mouse_chase_factor); // make it more
-                // pronounced
+                                                                    // pronounced
             }
         };
     };
@@ -217,7 +234,7 @@ pub fn velo_system(
         let width = ((window.width() - values.boid_bound_size) / 2.) as i32;
         let height = ((window.height() - values.boid_bound_size) / 2.) as i32;
 
-        if values.is_toroidal {
+        if values.modes.toroidal {
             // TODO:
         } else {
             let pos_x = transform.translation.x as i32;
@@ -260,6 +277,11 @@ fn steer_to(a: Vec2, b: Vec2) -> f32 {
     dir.y.atan2(dir.x)
 }
 
+// function that when called, will update the color of the current boid to be a bit closer to the
+// average color of the boids in it's neighborhood, if the neighborhood is less than a certain
+// size, it will slowly start to revert that change back to it's start_color
+
+
 pub fn setup_bounds(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -267,7 +289,7 @@ pub fn setup_bounds(
 ) {
     // Create a rectangular border
     let border_thickness = 2.0;
-    
+
     // Top border
     commands.spawn(SpriteBundle {
         sprite: Sprite {
@@ -312,3 +334,4 @@ pub fn setup_bounds(
         ..default()
     });
 }
+

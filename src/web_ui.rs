@@ -1,6 +1,7 @@
-use wasm_bindgen::prelude::*;
-use web_sys::{Window, Document, HtmlElement};
+//use wasm_bindgen::prelude::*;
+//use web_sys::{Window, Document, HtmlElement};
 
+/*
 #[wasm_bindgen]
 pub fn setup_ui() {
     let window = web_sys::window().expect("no global `window` exists");
@@ -37,3 +38,4 @@ static mut PREDATOR_MODE: bool = false;
 pub fn is_predator_mode() -> bool {
     unsafe { PREDATOR_MODE }
 }
+*/

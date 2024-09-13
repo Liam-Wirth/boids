@@ -1232,6 +1232,7 @@ dependencies = [
  "image",
  "log",
  "rand",
+ "rust-analyzer",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -3263,6 +3264,12 @@ dependencies = [
  "serde",
  "serde_derive",
 ]
+
+[[package]]
+name = "rust-analyzer"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11707871ffa56ce568d4f15dd34c2f891a2aa5e4b3435b99b8f99938492525c3"
 
 [[package]]
 name = "rustc-hash"
