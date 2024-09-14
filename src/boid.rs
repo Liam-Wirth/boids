@@ -393,3 +393,18 @@ pub fn setup_bounds(
         ..default()
     });
 }
+
+pub fn color_change_system(
+    mut color_events: EventReader<ColorEvent>,
+    mut boids: Query<(&mut SimpleColor, &Handle<ColorMaterial>)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    for ColorEvent(boid, new_color) in color_events.read() {
+        if let Ok((mut simple_color, material_handle)) = boids.get_mut(*boid) {
+            simple_color.0 = *new_color;
+            if let Some(material) = materials.get_mut(material_handle) {
+                material.color = Color::hsl(new_color.x, new_color.y, new_color.z);
+            }
+        }
+    }
+}
