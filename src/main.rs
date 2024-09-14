@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use bevy_spatial::{AutomaticUpdate, SpatialStructure};
-use boids::WINDOW_HEIGHT;
-use boids::WINDOW_WIDTH;
 use boids::boid::*;
 use boids::Values;
 use boids::BOUNDS;
+use boids::WINDOW_HEIGHT;
+use boids::WINDOW_WIDTH;
 use std::time::Duration;
 //
 // NOTE: The below code is ALSO really important for a rust-wasm binary to work. I am stupid and
@@ -33,10 +33,18 @@ pub fn main() {
     .insert_resource(Values::default())
     .insert_resource(Time::<Fixed>::from_hz(60.0))
     .add_event::<DvEvent>()
-    .add_event::<ColorEvent>() // event for changing the color of the boids 
+    .add_event::<ColorEvent>() // event for changing the color of the boids
     .add_systems(Startup, boid_setup)
     .add_systems(Update, ui_system)
-    .add_systems(FixedUpdate, (velo_system, movement_system, flocking_system))
+    .add_systems(
+        FixedUpdate,
+        (
+            velo_system,
+            movement_system,
+            flocking_system,
+            color_change_system,
+        ),
+    )
     //.add_systems(Update, ui_system)
     .run();
 }
@@ -76,10 +84,7 @@ pub fn start() {
     main();
 }
 
-pub fn ui_system(
-    mut egui_context: EguiContexts,
-    mut values: ResMut<Values>,
-) {
+pub fn ui_system(mut egui_context: EguiContexts, mut values: ResMut<Values>) {
     let ctx = &mut egui_context.ctx_mut();
     egui::Window::new("Settings")
         .resizable(true)
@@ -94,4 +99,3 @@ pub fn ui_system(
             });
         });
 }
-
