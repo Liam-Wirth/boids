@@ -81,7 +81,7 @@ pub fn boid_setup(
             Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)) * values.boid_speed,
         );
 
-        let start = SimpleColor::default();
+        let start = SimpleColor::random();
         let color = Color::hsl(start.0.x, start.0.y, start.0.z);
         commands.spawn((
             BoidBundle {
