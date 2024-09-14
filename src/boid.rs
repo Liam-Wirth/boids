@@ -116,16 +116,7 @@ pub fn boid_setup(
 */
 fn get_dv(
     kdtree: &Res<KDTree2<SpatialEntity>>,
-    boid_query: &Query<
-        (
-            Entity,
-            &Velocity,
-            &Transform,
-            &Handle<ColorMaterial>,
-            &SimpleColor,
-        ),
-        With<SpatialEntity>,
-    >,
+    boid_query: &Query<(Entity, &Velocity, &Transform, &Handle<ColorMaterial>, &SimpleColor), With<SpatialEntity>>,
     camera: &Query<(&Camera, &GlobalTransform)>,
     window: &Query<&Window>,
     boid: &Entity,
@@ -138,7 +129,8 @@ fn get_dv(
     let mut avg_velocity = Vec2::default();
     let mut neighboring_boids = 0;
     let mut close_boids = 0;
-    let mut total_color = Vec3::ZERO;
+    let mut total_hue = 0.0;
+    let mut total_saturation = 0.0;
 
     let (_, _, _, _, start_color) = boid_query.get(*boid).unwrap();
     let mut final_color = start_color.0;
@@ -160,11 +152,7 @@ fn get_dv(
         }
 
         if let Some(vec_to_norm) = vec_to.try_normalize() {
-            if t0
-                .rotation
-                .angle_between(Quat::from_rotation_arc_2d(Vec2::X, vec_to_norm))
-                > values.boid_fov
-            {
+            if t0.rotation.angle_between(Quat::from_rotation_arc_2d(Vec2::X, vec_to_norm)) > values.boid_fov {
                 continue;
             }
         }
@@ -176,7 +164,8 @@ fn get_dv(
             avg_position += vec_to;
             avg_velocity += v1.0;
             neighboring_boids += 1;
-            total_color += other_color.0;
+            total_hue += other_color.0.x;
+            total_saturation += other_color.0.y;
         }
     }
 
@@ -185,12 +174,17 @@ fn get_dv(
         dv += avg_position / neighbors * values.boid_centering_factor;
         dv += avg_velocity / neighbors * values.boid_matching_factor;
 
-        // Color blending
-        let avg_color = total_color / neighbors;
-        final_color = final_color.lerp(avg_color, 0.1); // Adjust 0.1 to control blending speed
+        // Color blending (HSL)
+        let avg_hue = total_hue / neighbors;
+        let avg_saturation = total_saturation / neighbors;
+        final_color.x = lerp(final_color.x, avg_hue, 0.1);
+        final_color.y = lerp(final_color.y, avg_saturation, 0.1);
+        // We keep the lightness (z component) constant
     } else {
         // Revert to start color when alone
-        final_color = final_color.lerp(start_color.0, 0.05); // Adjust 0.05 to control reversion speed
+        final_color.x = lerp(final_color.x, start_color.0.x, 0.05);
+        final_color.y = lerp(final_color.y, start_color.0.y, 0.05);
+        // We keep the lightness (z component) constant
     }
 
     if close_boids > 0 {
@@ -213,7 +207,11 @@ fn get_dv(
 
     (dv, final_color)
 }
-/**
+
+// Helper function for linear interpolation
+fn lerp(a: f32, b: f32, t: f32) -> f32 {
+    a + (b - a) * t
+}/**
 * @param boid_query: Query<(Entity, &Velocity, &Transform), With<SpatialEntity>> - Query of all
 * boids
 * @param kdtree: Res<KDTree2<SpatialEntity> - The KDTree of all boids
