@@ -1,10 +1,13 @@
 use crate::Values;
 use crate::BOUNDS;
 use bevy::math::Vec2;
+use bevy::math::Vec3;
+use bevy::math::*;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::sprite::Mesh2dHandle;
 use bevy::tasks::ComputeTaskPool;
+use bevy_egui::egui::epaint::color;
 use bevy_spatial::kdtree::KDTree2;
 use bevy_spatial::SpatialAccess;
 use halton::Sequence;
@@ -17,23 +20,32 @@ pub struct Velocity(Vec2);
 pub struct SpatialEntity;
 
 #[derive(Component)]
-pub struct StartingColor(Vec3); // Stored as a vec3 cause it's lighter than a Color object
+pub struct SimpleColor(Vec3); // Stored as a vec3 cause it's lighter than a Color object
 
-impl Default for StartingColor {
+impl Default for SimpleColor {
     fn default() -> Self {
+        SimpleColor(Vec3::ZERO)
+    }
+}
+
+impl SimpleColor {
+    pub fn random() -> Self {
         let mut rng = rand::thread_rng();
-        StartingColor((360. * rng.gen::<f32>(), rng.gen(), 0.7).into())
+        SimpleColor((360. * rng.gen::<f32>(), rng.gen(), 0.7).into())
     }
 }
 #[derive(Bundle)]
 pub struct BoidBundle {
     mesh: MaterialMesh2dBundle<ColorMaterial>,
     velocity: Velocity,
-    start_color: StartingColor,
+    start_color: SimpleColor,
 }
 
 #[derive(Event)]
 pub struct DvEvent(Entity, Vec2);
+
+#[derive(Event)]
+pub struct ColorEvent(Entity, Vec3);
 
 impl Default for BoidBundle {
     fn default() -> Self {
@@ -41,7 +53,7 @@ impl Default for BoidBundle {
         Self {
             mesh: Default::default(),
             velocity: Velocity(Vec2::default()),
-            start_color: StartingColor::default(),
+            start_color: SimpleColor::random(),
         }
     }
 }
@@ -69,7 +81,7 @@ pub fn boid_setup(
             Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)) * values.boid_speed,
         );
 
-        let start = StartingColor::default();
+        let start = SimpleColor::default();
         let color = Color::hsl(start.0.x, start.0.y, start.0.z);
         commands.spawn((
             BoidBundle {
@@ -88,43 +100,65 @@ pub fn boid_setup(
     }
 }
 
+/**
+* @param kdtree: KDTree2<SpatialEntity> - The KDTree of all boids
+* @param boid_query: Query<(Entity, &Velocity, &Transform), With<SpatialEntity>> - Query of all
+* boids
+* @param camera: Query<(&Camera, &GlobalTransform)> - Query of the camera
+* @param window: Query<&Window> - Query of the window
+* @param boid: &Entity - The entity of the boid
+* @param t0: &&Transform - The transform of the boid
+* @param values: &Res<Values> - The values resource
+* @return Vec2 - The delta velocity
+* @description Get the delta velocity for a boid, this is where all the real logic of the boids and
+* stuff takes place
+*
+*/
 fn get_dv(
     kdtree: &Res<KDTree2<SpatialEntity>>,
-    boid_query: &Query<(Entity, &Velocity, &Transform), With<SpatialEntity>>,
+    boid_query: &Query<
+        (
+            Entity,
+            &Velocity,
+            &Transform,
+            &Handle<ColorMaterial>,
+            &SimpleColor,
+        ),
+        With<SpatialEntity>,
+    >,
     camera: &Query<(&Camera, &GlobalTransform)>,
     window: &Query<&Window>,
     boid: &Entity,
     t0: &&Transform,
     values: &Res<Values>,
-) -> Vec2 {
-    // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
+) -> (Vec2, Vec3) {
     let mut dv = Vec2::default();
     let mut vec_away = Vec2::default();
     let mut avg_position = Vec2::default();
     let mut avg_velocity = Vec2::default();
     let mut neighboring_boids = 0;
     let mut close_boids = 0;
-    let mut totalcolor = Vec3::ZERO; // gonna blend the color of boids that start flocking together
+    let mut total_color = Vec3::ZERO;
+
+    let (_, _, _, _, start_color) = boid_query.get(*boid).unwrap();
+    let mut final_color = start_color.0;
 
     for (_, entity) in kdtree.k_nearest_neighbour(t0.translation.xy(), values.max_neighbors) {
-        let Ok((other, v1, t1)) = boid_query.get(entity.unwrap()) else {
-            todo!()
+        let Ok((other, v1, t1, _, other_color)) = boid_query.get(entity.unwrap()) else {
+            continue;
         };
 
-        // Don't evaluate against itself
         if *boid == other {
             continue;
         }
 
         let vec_to = (t1.translation - t0.translation).xy();
-        let dist_sq = vec_to.x * vec_to.x + vec_to.y * vec_to.y;
+        let dist_sq = vec_to.length_squared();
 
-        // Don't evaluate boids out of range
         if dist_sq > values.vis_range_sq {
             continue;
         }
 
-        // Don't evaluate boids behind
         if let Some(vec_to_norm) = vec_to.try_normalize() {
             if t0
                 .rotation
@@ -136,15 +170,13 @@ fn get_dv(
         }
 
         if dist_sq < values.prot_range_sq {
-            // separation
             vec_away -= vec_to;
             close_boids += 1;
         } else {
-            // cohesion
             avg_position += vec_to;
-            // alignment
             avg_velocity += v1.0;
             neighboring_boids += 1;
+            total_color += other_color.0;
         }
     }
 
@@ -152,6 +184,13 @@ fn get_dv(
         let neighbors = neighboring_boids as f32;
         dv += avg_position / neighbors * values.boid_centering_factor;
         dv += avg_velocity / neighbors * values.boid_matching_factor;
+
+        // Color blending
+        let avg_color = total_color / neighbors;
+        final_color = final_color.lerp(avg_color, 0.1); // Adjust 0.1 to control blending speed
+    } else {
+        // Revert to start color when alone
+        final_color = final_color.lerp(start_color.0, 0.05); // Adjust 0.05 to control reversion speed
     }
 
     if close_boids > 0 {
@@ -159,26 +198,44 @@ fn get_dv(
         dv += vec_away / close * values.boid_avoidance_factor;
     }
 
-    // Chase the mouse
+    // Mouse chasing logic (unchanged)
     let (camera, t_camera) = camera.single();
     if let Some(c_window) = window.single().cursor_position() {
         if let Some(c_world) = camera.viewport_to_world_2d(t_camera, c_window) {
+            let to_cursor = c_world - t0.translation.xy();
             if !values.modes.mouse_predator {
-                let to_cursor = c_world - t0.translation.xy();
                 dv += to_cursor * values.boid_mouse_chase_factor;
             } else {
-                let to_cursor = c_world - t0.translation.xy();
-                dv -= to_cursor * (values.boid_mouse_chase_factor); // make it more
-                                                                    // pronounced
+                dv -= to_cursor * values.boid_mouse_chase_factor;
             }
         };
     };
 
-    dv
+    (dv, final_color)
 }
-
+/**
+* @param boid_query: Query<(Entity, &Velocity, &Transform), With<SpatialEntity>> - Query of all
+* boids
+* @param kdtree: Res<KDTree2<SpatialEntity> - The KDTree of all boids
+* @param dv_event_writer: EventWriter<DvEvent> - The event writer for the delta velocity events
+* @param camera: Query<(&Camera, &GlobalTransform)> - Query of the camera
+* @param window: Query<&Window> - Query of the window
+* @param values: Res<Values> - The values resource
+* @description The "parent" system for the boids, this is where the boids are updated as well as where
+* the threads are spawned/managed
+*
+*/
 pub fn flocking_system(
-    boid_query: Query<(Entity, &Velocity, &Transform), With<SpatialEntity>>,
+    boid_query: Query<
+        (
+            Entity,
+            &Velocity,
+            &Transform,
+            &Handle<ColorMaterial>,
+            &SimpleColor,
+        ),
+        With<SpatialEntity>,
+    >,
     kdtree: Res<KDTree2<SpatialEntity>>,
     mut dv_event_writer: EventWriter<DvEvent>,
     camera: Query<(&Camera, &GlobalTransform)>,
@@ -201,14 +258,17 @@ pub fn flocking_system(
 
             s.spawn(async move {
                 let mut dv_batch: Vec<DvEvent> = vec![];
+                let mut color_batch: Vec<ColorEvent> = vec![];
+                for (boid, _, t0, _, _) in chunk {
+                    //dv_batch.push(DvEvent(
+                    //    *boid,
+                    //    get_dv(kdtree, boid_query, camera, window, boid, t0, values),
+                    let (dv, new_color) =
+                        get_dv(kdtree, boid_query, camera, window, boid, t0, values);
 
-                for (boid, _, t0) in chunk {
-                    dv_batch.push(DvEvent(
-                        *boid,
-                        get_dv(kdtree, boid_query, camera, window, boid, t0, values),
-                    ));
+                    dv_batch.push(DvEvent(*boid, dv));
+                    color_batch.push(ColorEvent(*boid, new_color)); //Jeez this is uggly
                 }
-
                 dv_batch
             });
         }
@@ -281,7 +341,6 @@ fn steer_to(a: Vec2, b: Vec2) -> f32 {
 // average color of the boids in it's neighborhood, if the neighborhood is less than a certain
 // size, it will slowly start to revert that change back to it's start_color
 
-
 pub fn setup_bounds(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -334,4 +393,3 @@ pub fn setup_bounds(
         ..default()
     });
 }
-

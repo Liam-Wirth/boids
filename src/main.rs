@@ -33,6 +33,7 @@ pub fn main() {
     .insert_resource(Values::default())
     .insert_resource(Time::<Fixed>::from_hz(60.0))
     .add_event::<DvEvent>()
+    .add_event::<ColorEvent>() // event for changing the color of the boids 
     .add_systems(Startup, boid_setup)
     .add_systems(Update, ui_system)
     .add_systems(FixedUpdate, (velo_system, movement_system, flocking_system))
