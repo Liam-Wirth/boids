@@ -70,6 +70,8 @@ pub fn boid_setup(
         .zip(Sequence::new(3))
         .zip(1..values.boid_count);
 
+    let mut test: bool = false;
+
     for ((x, y), _) in seq {
         let spawn_x = (x as f32 * BOUNDS.x) - BOUNDS.x / 2.0;
         let spawn_y = (y as f32 * BOUNDS.y) - BOUNDS.y / 2.0;
@@ -83,20 +85,18 @@ pub fn boid_setup(
 
         let start = SimpleColor::random();
         let color = Color::hsl(start.0.x, start.0.y, start.0.z);
-        commands.spawn((
-            BoidBundle {
-                mesh: MaterialMesh2dBundle {
-                    mesh: Mesh2dHandle(meshes.add(Circle { radius: 4.0 })),
-                    //material: materials.add(Color::hsl(360. * rng.gen::<f32>(), rng.gen(), 0.7)),
-                    material: materials.add(color),
-                    transform,
-                    ..default()
-                },
-                velocity,
-                start_color: start,
+        let magic: BoidBundle = BoidBundle {
+            mesh: MaterialMesh2dBundle {
+                mesh: Mesh2dHandle(meshes.add(Circle { radius: 4.0 })),
+                //material: materials.add(Color::hsl(360. * rng.gen::<f32>(), rng.gen(), 0.7)),
+                material: materials.add(color),
+                transform,
+                ..default()
             },
-            SpatialEntity,
-        ));
+            velocity,
+            start_color: start,
+        };
+        commands.spawn((magic, SpatialEntity));
     }
 }
 
@@ -116,7 +116,16 @@ pub fn boid_setup(
 */
 fn get_dv(
     kdtree: &Res<KDTree2<SpatialEntity>>,
-    boid_query: &Query<(Entity, &Velocity, &Transform, &Handle<ColorMaterial>, &SimpleColor), With<SpatialEntity>>,
+    boid_query: &Query<
+        (
+            Entity,
+            &Velocity,
+            &Transform,
+            &Handle<ColorMaterial>,
+            &SimpleColor,
+        ),
+        With<SpatialEntity>,
+    >,
     camera: &Query<(&Camera, &GlobalTransform)>,
     window: &Query<&Window>,
     boid: &Entity,
@@ -152,7 +161,11 @@ fn get_dv(
         }
 
         if let Some(vec_to_norm) = vec_to.try_normalize() {
-            if t0.rotation.angle_between(Quat::from_rotation_arc_2d(Vec2::X, vec_to_norm)) > values.boid_fov {
+            if t0
+                .rotation
+                .angle_between(Quat::from_rotation_arc_2d(Vec2::X, vec_to_norm))
+                > values.boid_fov
+            {
                 continue;
             }
         }
@@ -182,8 +195,8 @@ fn get_dv(
         // We keep the lightness (z component) constant
     } else {
         // Revert to start color when alone
-        final_color.x = lerp(final_color.x, start_color.0.x, 0.05);
-        final_color.y = lerp(final_color.y, start_color.0.y, 0.05);
+        final_color.x = lerp(final_color.x, start_color.0.x, 0.15);
+        final_color.y = lerp(final_color.y, start_color.0.y, 0.15);
         // We keep the lightness (z component) constant
     }
 
@@ -211,7 +224,8 @@ fn get_dv(
 // Helper function for linear interpolation
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
     a + (b - a) * t
-}/**
+}
+/**
 * @param boid_query: Query<(Entity, &Velocity, &Transform), With<SpatialEntity>> - Query of all
 * boids
 * @param kdtree: Res<KDTree2<SpatialEntity> - The KDTree of all boids
