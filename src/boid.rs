@@ -20,7 +20,7 @@ pub struct Velocity(Vec2);
 pub struct SpatialEntity;
 
 #[derive(Component)]
-pub struct SimpleColor(Vec3); // Stored as a vec3 cause it's lighter than a Color object
+pub struct SimpleColor(Vec3); // Stored as a vec3 cause it's lighter than a Color object (really???)
 
 impl Default for SimpleColor {
     fn default() -> Self {
@@ -297,21 +297,20 @@ pub fn velo_system(
 ) {
     for DvEvent(boid, dv) in events.read() {
         let Ok((mut velocity, transform)) = boids.get_mut(*boid) else {
-            todo!()
+            continue;
         };
 
         velocity.0 += *dv;
 
         let window = window.single();
-        let width = ((window.width() - values.boid_bound_size) / 2.) as i32;
-        let height = ((window.height() - values.boid_bound_size) / 2.) as i32;
+        let width = ((window.width() - values.boid_bound_size) / 2.) as f32;
+        let height = ((window.height() - values.boid_bound_size) / 2.) as f32;
 
-        if values.modes.toroidal {
-            // TODO:
-        } else {
-            let pos_x = transform.translation.x as i32;
-            let pos_y = transform.translation.y as i32;
-            // Steer back into visible region
+        let pos_x = transform.translation.x;
+        let pos_y = transform.translation.y;
+
+        if !values.modes.toroidal {
+            // Gentle turning when approaching borders
             if pos_x < -width {
                 velocity.0.x += values.boid_turn_factor;
             }
@@ -324,14 +323,27 @@ pub fn velo_system(
             if pos_y > height {
                 velocity.0.y -= values.boid_turn_factor;
             }
+
+            // Only apply hard limits if really necessary
+            if pos_x < -width - 50.0 {
+                velocity.0.x = velocity.0.x.abs();
+            }
+            if pos_x > width + 50.0 {
+                velocity.0.x = -velocity.0.x.abs();
+            }
+            if pos_y < -height - 50.0 {
+                velocity.0.y = velocity.0.y.abs();
+            }
+            if pos_y > height + 50.0 {
+                velocity.0.y = -velocity.0.y.abs();
+            }
         }
 
         // Clamp speed
         let speed = velocity.0.length();
-
         if speed < values.boid_min_speed {
             velocity.0 *= values.boid_min_speed / speed;
-        } else {
+        } else if speed > values.boid_max_speed {
             velocity.0 *= values.boid_max_speed / speed;
         }
     }

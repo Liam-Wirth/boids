@@ -15,11 +15,11 @@ pub const MARGIN: f32 = 50.0;
 pub const BOUNDS: Vec2 = Vec2::new(WINDOW_WIDTH - 2.0 * MARGIN, WINDOW_HEIGHT - 2.0 * MARGIN);
 
 #[cfg(target_arch = "wasm32")]
-pub const WINDOW_WIDTH: f32 = 1000.0;
+pub const WINDOW_WIDTH: f32 = 1500.0;
 #[cfg(target_arch = "wasm32")]
-pub const WINDOW_HEIGHT: f32 = 800.;
+pub const WINDOW_HEIGHT: f32 = 600.0;
 #[cfg(target_arch = "wasm32")]
-pub const MARGIN: f32 = 150.0;
+pub const MARGIN: f32 = 100.0;
 #[cfg(target_arch = "wasm32")]
 pub const BOUNDS: Vec2 = Vec2::new(WINDOW_WIDTH - 2.0 * MARGIN, WINDOW_HEIGHT - 2.0 * MARGIN);
 
@@ -106,21 +106,21 @@ impl Default for Values {
     #[cfg(target_arch = "wasm32")]
     fn default() -> Self {
         Self {
-            boid_count: 100,
-            boid_size: 0.4,
+            boid_count: 108,
+            boid_size: 0.7,
             boid_speed: 2.5,
             max_neighbors: 20,
             boid_vis_range: 25.0,
             boid_fov: 120.0 * std::f32::consts::PI / 180.0,
             boid_bound_size: 98.0,
-            boid_turn_factor: 0.5,
+            boid_turn_factor: 0.75,
             boid_prot_range: 10.0,
-            boid_centering_factor: 0.0008,
-            boid_mouse_chase_factor: 0.0006,
+            boid_centering_factor: 0.0004,
+            boid_mouse_chase_factor: 0.0003,
             boid_avoidance_factor: 0.05,
             boid_matching_factor: 0.05,
-            boid_min_speed: 5.,
-            boid_max_speed: 10.,
+            boid_min_speed: 3.,
+            boid_max_speed: 7.,
             vis_range_sq: 25.0 * 25.0, // Updated to match new boid_vis_range
             prot_range_sq: 10.0 * 10.0,
             modes: Modes {
@@ -129,7 +129,7 @@ impl Default for Values {
                 color_mode: false,
                 color_flocking: false,
                 perching: false,
-                is_toroidal: false,
+                toroidal: false,
             },
         }
     }
@@ -144,35 +144,35 @@ pub fn update_fps_counter(time: Res<Time>, mut fps_counter: ResMut<FpsCounter>) 
     fps_counter.fps = 1.0 / time.delta_seconds_f64();
 }
 
-pub fn display_fps(
-    mut commands: Commands,
-    fps_counter: Res<FpsCounter>,
-    mut query: Query<Entity, With<FpsText>>,
-) {
-    let fps_text = format!("FPS: {:.2}", fps_counter.fps);
+// pub fn display_fps(
+//     mut commands: Commands,
+//     fps_counter: Res<FpsCounter>,
+//     mut query: Query<Entity, With<FpsText>>,
+// ) {
+//     let fps_text = format!("FPS: {:.2}", fps_counter.fps);
 
-    if let Ok(entity) = query.get_single_mut() {
-        commands.entity(entity).despawn();
-    }
+//     if let Ok(entity) = query.get_single_mut() {
+//         commands.entity(entity).despawn();
+//     }
 
-    commands.spawn((
-        TextBundle::from_section(
-            fps_text,
-            TextStyle {
-                font_size: 20.0,
-                color: Color::WHITE,
-                ..default()
-            },
-        )
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            top: Val::Px(10.0),
-            left: Val::Px(10.0),
-            ..default()
-        }),
-        FpsText,
-    ));
-}
+//     commands.spawn((
+//         TextBundle::from_section(
+//             fps_text,
+//             TextStyle {
+//                 font_size: 20.0,
+//                 color: Color::WHITE,
+//                 ..default()
+//             },
+//         )
+//         .with_style(Style {
+//             position_type: PositionType::Absolute,
+//             top: Val::Px(10.0),
+//             left: Val::Px(10.0),
+//             ..default()
+//         }),
+//         FpsText,
+//     ));
+// }
 
 #[derive(Component)]
 pub struct FpsText;

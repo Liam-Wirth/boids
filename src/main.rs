@@ -50,6 +50,7 @@ pub fn main() {
 }
 #[cfg(target_arch = "wasm32")]
 fn main() {
+    web_sys::console::log_1(&"Initializing WASM application...".into());
     // Redirect `log` message to `console.log` and friends:
     //eframe::WebLogger::init(log::LevelFilter::Debug).ok();
     (App::new().add_plugins((
