@@ -14,8 +14,8 @@ on:
 # ToDo: adapt names
 env:
   # This variable is used to name release output files.
-  GAME_EXECUTABLE_NAME: bevy_game
-  GAME_OSX_APP_NAME: BevyGame
+  GAME_EXECUTABLE_NAME: Boids
+  GAME_OSX_APP_NAME: Boids 
 
 permissions:
   contents: write
@@ -254,7 +254,6 @@ jobs:
       - name: Install Cargo APK
         run: cargo install --force cargo-apk
       - name: Build app for Android
-        # This uses a debug build, since release builds require keystore configuration
         # For AAB builds that can be pushed to the Play store, see the release-android-google-play workflow.
         run: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME cargo apk build --package mobile
       - name: Upload release

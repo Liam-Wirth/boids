@@ -75,7 +75,7 @@ impl Default for Values {
     #[cfg(not(target_arch = "wasm32"))]
     fn default() -> Self {
         Self {
-            boid_count: 500,
+            boid_count: 1500,
             boid_size: 0.4,
             boid_speed: 5.,
             max_neighbors: 100,
@@ -107,8 +107,8 @@ impl Default for Values {
     fn default() -> Self {
         Self {
             boid_count: 108,
-            boid_size: 0.7,
-            boid_speed: 2.5,
+            boid_size: 1.,
+            boid_speed: 3.5,
             max_neighbors: 20,
             boid_vis_range: 25.0,
             boid_fov: 120.0 * std::f32::consts::PI / 180.0,
@@ -116,7 +116,7 @@ impl Default for Values {
             boid_turn_factor: 0.75,
             boid_prot_range: 10.0,
             boid_centering_factor: 0.0004,
-            boid_mouse_chase_factor: 0.0003,
+            boid_mouse_chase_factor: 0.0004,
             boid_avoidance_factor: 0.05,
             boid_matching_factor: 0.05,
             boid_min_speed: 3.,

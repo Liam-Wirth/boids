@@ -1,11 +1,11 @@
 {
   "name": "boids-wasm",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "tailwindcss -i ./tailwind.css -o ./dist/tailwind.css --minify",
-    "watch:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/tailwind.css --watch"
+    "build:css": "tailwindcss -i ./styles.css -o ./dist/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./assets/styles.css -o ./dist/tailwind.css --watch"
   },
   "keywords": [],
   "author": "",
