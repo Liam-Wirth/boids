@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Boids Simulation</title>
+        <link rel="stylesheet" href="/styles-8ab95547d2dc1d20.css" integrity="sha384&#x2D;Nec8PJTSCQFWVUnrQmivKc0yl5yWxDbpKhGyxDLqOI4ltXJH9rmPbG7HPjMppzg&#x2F;"/>
+        <style>
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+            #bevy_boids_canvas {
+                display: block; /* Removes scrollbars */
+            }
+        </style>
+    <link rel="modulepreload" href="/boids-b47559612868180c.js" crossorigin=anonymous integrity="sha384-ROrzEEcjMJzNIdwiQoBvNHB1uv21UZX67VU1wAm+zadWtXORHVBFEhbEq5gwhZGX"><link rel="preload" href="/boids-b47559612868180c_bg.wasm" crossorigin=anonymous integrity="sha384-IviF4MgO4MSGVZY44hfPXqr2kSqnuhoFQEa2KtE25Sbbv5zMSNgEl6oGons5az8a" as="fetch" type="application/wasm"></head>
+    <body class="min-h-screen bg-gray-900 text-gray-100">
+        <div class="container mx-auto px-4 py-8 max-w-[1600px]">
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-2">Boids Simulation</h1>
+                <p class="text-gray-400">
+                    A Rust + WebAssembly Implementation of Flocking Behavior
+                </p>
+            </header>
+
+            <!-- Simulation Container -->
+            <div class="mb-8">
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <canvas
+                        id="bevy_boids_canvas"
+                        class="rounded-lg w-full h-auto"
+                        style="touch-action: none"
+                    ></canvas>
+                    <div
+                        id="loading-placeholder"
+                        class="rounded-lg w-full bg-gray-700 animate-pulse"
+                    ></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- About -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4">About</h2>
+                    <p class="text-gray-300 mb-4">
+                        This simulation demonstrates emergent flocking behavior
+                        using Craig Reynolds' Boids algorithm. Each boid follows
+                        three simple rules:
+                    </p>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>Separation: Avoid crowding neighbors</li>
+                        <li>Alignment: Match velocity with neighbors</li>
+                        <li>
+                            Cohesion: Move toward the center of nearby boids
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Implementation Details -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4">
+                        Technical Details
+                    </h2>
+                    <ul class="text-gray-300 space-y-2">
+                        <li><span class="font-semibold">Engine:</span> Bevy</li>
+                        <li>
+                            <span class="font-semibold">Language:</span> Rust
+                        </li>
+                        <li>
+                            <span class="font-semibold"
+                                >Spatial Partitioning:</span
+                            >
+                            KD-Tree
+                        </li>
+                        <li>
+                            <span class="font-semibold">Performance:</span>
+                            Multi-threaded computation
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Controls -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Controls</h2>
+                    <div class="space-y-2">
+                        <h1>To Be Implemented</h1>
+                        <h2>
+                            I appologize but please understand I am a busy
+                            college student
+                        </h2>
+                        <button
+                            id="toggle-predator"
+                            class="w-full px-4 py-2 bg-blue-700 hover:bg-blue-700 rounded-lg transition-colors disabled"
+                        >
+                            Toggle Predator Mode
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-8 text-center text-gray-400">
+                <p>Built with Rust, WebAssembly, and Bevy Engine</p>
+            </footer>
+        </div>
+
+        <script type="module">
+            (async () => {
+                try {
+                    const module = await import("./pkg/boids.js");
+                    await module.default();
+
+                    const canvas = document.getElementById("bevy_boids_canvas");
+                    const loadingPlaceholder = document.getElementById(
+                        "loading-placeholder",
+                    );
+
+                    // Initialize Bevy application
+                    module.start();
+
+                    // Hide loading placeholder
+                    if (loadingPlaceholder)
+                        loadingPlaceholder.classList.add("hidden");
+                    if (canvas) canvas.classList.remove("hidden");
+
+                    // Resize canvas to fit window
+                    const resizeCanvas = () => {
+                        const width = window.innerWidth;
+                        const height = window.innerHeight;
+                        canvas.width = width;
+                        canvas.height = height;
+                    };
+
+                    // Initial resize and listener for dynamic resizing
+                    resizeCanvas();
+                    window.addEventListener("resize", resizeCanvas);
+
+                    console.log(
+                        "WASM module loaded and initialized successfully",
+                    );
+                } catch (error) {
+                    console.error(
+                        "Failed to load or initialize the WASM module:",
+                        error,
+                    );
+                    const errorMessage = document.createElement("div");
+                    errorMessage.className = "text-red-500 text-center mt-4";
+                    errorMessage.textContent =
+                        "Failed to load simulation. Please refresh the page.";
+                    document.getElementById("loading-placeholder")?.remove();
+                }
+            })();
+        </script>
+    
+<script type="module" nonce="LZY8Rp5duBC4Pka4M6vTxA==">
+import init, * as bindings from '/boids-b47559612868180c.js';
+const wasm = await init({ module_or_path: '/boids-b47559612868180c_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script></body>
+</html>
