@@ -10,28 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Set Up Rust
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Set Up Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      # Step 3: Rust Cache
-      - name: Cache Cargo
-        uses: Swatinem/rust-cache@v1
-
-      # Step 4: Install Node.js
-      - name: Set Up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      # Step 5: Cache Node Modules
       - name: Cache Node Modules
         uses: actions/cache@v3
         with:
@@ -40,25 +32,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # Step 6: Install Tailwind and Node Dependencies
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
-      # Step 7: Install Trunk
-      - name: Install Trunk
-        uses: jetli/trunk-action@v0.1.0
-
-      # Step 8: Build with Trunk and Tailwind
       - name: Build Project
         run: |
           npm run build:css
           trunk build --release
 
-      # Step 9: Add .nojekyll (optional, but harmless)
-      - name: Add .nojekyll
-        run: echo > dist/.nojekyll
-
-      # Step 10: Upload Build Artifact
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
@@ -70,19 +59,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Download Build Artifact
       - name: Download Build Artifact
         uses: actions/download-artifact@v3
         with:
           name: build
 
-      # Step 2: Deploy to Vercel
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v21
+        uses: amondnet/vercel-action@v25.2.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: dist
-          prod: true
+          vercel-args: '--prod'
 
