@@ -1,4 +1,4 @@
-name: deploy-github-page
+name: Deploy Boids Simulation
 
 on:
   push:
@@ -9,35 +9,51 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  build-web:
+  release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install rust toolchain
-        uses: dtolnay/rust-toolchain@master
+      # Step 1: Checkout code
+      - uses: actions/checkout@v2
+
+      # Step 2: Install Rust toolchain and WebAssembly target
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - name: Install Dependencies
-        run: sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev
-      - name: Install trunk
-        uses: jetli/trunk-action@v0.4.0
+          target: wasm32-unknown-unknown
+
+      # Step 3: Cache Rust dependencies for faster builds
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1
+
+      # Step 4: Install Trunk for building the project
+      - name: Install Trunk
+        uses: jetli/trunk-action@v0.1.0
+
+      # Step 5: Install Node.js and Tailwind dependencies
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
-          version: 'latest'
-      - name: Add wasm target
-        run: rustup target add wasm32-unknown-unknown
-      - name: Build Release
-        run: trunk build --release
+          node-version: 18
+
+      - name: Install Tailwind Dependencies
+        run: npm ci
+
+      # Step 6: Build Tailwind CSS and Trunk
+      - name: Build with Trunk and Tailwind
+        run: |
+          npm run build:css
+          trunk build --release
+
+      # Step 7: Add .nojekyll to prevent Jekyll processing
       - name: Add .nojekyll
         run: echo > dist/.nojekyll
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+
+      # Step 8: Deploy to GitHub Pages
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages
           folder: dist
+          single-commit: true
 
