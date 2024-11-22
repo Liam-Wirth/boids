@@ -1,0 +1,7 @@
+{
+  "build": {
+    "command": "echo 'Skipping Vercel build because GitHub Actions is handling it.'"
+  },
+  "cleanUrls": true
+}
+
