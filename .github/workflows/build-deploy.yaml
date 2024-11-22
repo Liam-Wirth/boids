@@ -35,9 +35,7 @@ jobs:
       - name: Cache Cargo
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+          path: ~/.cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -46,7 +44,9 @@ jobs:
         run: npm install
 
       - name: Install Trunk
-        uses: jetli/trunk-action@v0.1.0
+        run: |
+          cargo install trunk
+          export PATH="$HOME/.cargo/bin:$PATH"
 
       - name: Build Project
         run: |
@@ -70,11 +70,11 @@ jobs:
           name: build
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: dist
-          prod: true
+          vercel-args: '--prod'
 
