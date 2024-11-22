@@ -8,6 +8,7 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 permissions:
   contents: write
 
@@ -29,17 +30,14 @@ jobs:
         with:
           version: 'latest'
       - name: Add wasm target
-        run: |
-          rustup target add wasm32-unknown-unknown
+        run: rustup target add wasm32-unknown-unknown
       - name: Build Release
-        run: |
-          trunk build --release
-      - name: optimize Wasm
-        uses: NiklasEi/wasm-opt-action@v2
-        with:
-          file: dist/*.wasm
+        run: trunk build --release
+      - name: Add .nojekyll
+        run: echo > dist/.nojekyll
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           branch: gh-pages
           folder: dist
+
