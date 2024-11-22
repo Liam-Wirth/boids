@@ -4,19 +4,20 @@
    "main": "index.html",
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
-      "build:css": "tailwindcss -i ./styles.css -o ./dist/tailwind.css --minify",
-      "watch:css": "tailwindcss -i ./assets/styles.css -o ./dist/tailwind.css --watch",
-      "install:rust": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && . $HOME/.cargo/env && cargo install --locked trunk",
-      "build:project": "echo \"Current Directory: $(pwd)\" && ls -la && npm run build:css && /vercel/.cargo/bin/trunk build --release"
-   },
-   "keywords": [],
-   "author": "",
-   "license": "ISC",
-   "description": "Boids simulation with WebAssembly and TailwindCSS",
-   "dependencies": {
-      "tailwindcss": "^3.4.10"
-   },
-   "devDependencies": {
-      "daisyui": "^4.12.10"
+      "scripts": {
+         "build:css": "tailwindcss -i ./styles.css -o ./dist/tailwind.css --minify",
+         "watch:css": "tailwindcss -i ./assets/styles.css -o ./dist/tailwind.css --watch",
+         "install:rust": "if ! command -v cargo &> /dev/null; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env; fi && if ! command -v trunk &> /dev/null; then cargo install --locked trunk; fi",
+         "build:project": "echo \"Current Directory: $(pwd)\" && ls -la && npm run build:css && /vercel/.cargo/bin/trunk build --release"
+      },
+      "keywords": [],
+      "author": "",
+      "license": "ISC",
+      "description": "Boids simulation with WebAssembly and TailwindCSS",
+      "dependencies": {
+         "tailwindcss": "^3.4.10"
+      },
+      "devDependencies": {
+         "daisyui": "^4.12.10"
+      }
    }
-}
