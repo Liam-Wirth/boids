@@ -7,7 +7,6 @@ use boids::BOUNDS;
 use boids::WINDOW_HEIGHT;
 use boids::WINDOW_WIDTH;
 use std::time::Duration;
-//
 // NOTE: The below code is ALSO really important for a rust-wasm binary to work. I am stupid and
 // did not realize this
 #[cfg(target_arch = "wasm32")]
