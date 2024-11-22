@@ -7,7 +7,7 @@
       "build:css": "tailwindcss -i ./styles.css -o ./dist/tailwind.css --minify",
       "watch:css": "tailwindcss -i ./assets/styles.css -o ./dist/tailwind.css --watch",
       "install:rust": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && . $HOME/.cargo/env && cargo install --locked trunk",
-      "build:project": "npm run build:css && trunk build --release"
+      "build:project": "npm run build:css && /vercel/.cargo/bin/trunk build --release"
    },
    "keywords": [],
    "author": "",
