@@ -4,7 +4,6 @@
    "main": "index.html",
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
-      "scripts": {
          "build:css": "tailwindcss -i ./styles.css -o ./dist/tailwind.css --minify",
          "watch:css": "tailwindcss -i ./assets/styles.css -o ./dist/tailwind.css --watch",
          "install:rust": "if ! command -v cargo &> /dev/null; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env; fi && if ! command -v trunk &> /dev/null; then cargo install --locked trunk; fi",
